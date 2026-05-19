@@ -2,7 +2,8 @@
 
 from __future__ import annotations
 
-from typing import Any, AsyncIterator, Optional
+from collections.abc import AsyncIterator
+from typing import Any
 
 from tokenoptim.providers.base import BaseProvider
 
@@ -27,7 +28,7 @@ class AsyncAnthropicProvider(BaseProvider):
 
     def __init__(
         self,
-        api_key: Optional[str] = None,
+        api_key: str | None = None,
         model: str = "claude-sonnet-4-6",
         enable_caching: bool = True,
     ) -> None:
@@ -51,7 +52,7 @@ class AsyncAnthropicProvider(BaseProvider):
     async def async_chat(
         self,
         messages: list[dict],
-        system: Optional[str] = None,
+        system: str | None = None,
         max_tokens: int = 1024,
         **kwargs: Any,
     ) -> dict:
@@ -81,7 +82,7 @@ class AsyncAnthropicProvider(BaseProvider):
     async def stream(
         self,
         messages: list[dict],
-        system: Optional[str] = None,
+        system: str | None = None,
         max_tokens: int = 1024,
         **kwargs: Any,
     ) -> AsyncIterator[str]:
@@ -113,7 +114,7 @@ class AsyncAnthropicProvider(BaseProvider):
             text += " " + system
         return len(text) // 4
 
-    def _build_system(self, system: Optional[str]):
+    def _build_system(self, system: str | None):
         if not system:
             return None
         if self.enable_caching:

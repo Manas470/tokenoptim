@@ -16,7 +16,7 @@ import asyncio
 import logging
 import random
 import time
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import Callable, TypeVar
 
 logger = logging.getLogger("tokenoptim.retry")
@@ -62,7 +62,10 @@ def _get_retry_after(exc: Exception) -> float | None:
         return None
     retry_after = None
     if hasattr(headers, "headers"):
-        retry_after = headers.headers.get("retry-after") or headers.headers.get("x-ratelimit-reset-requests")
+        retry_after = (
+            headers.headers.get("retry-after")
+            or headers.headers.get("x-ratelimit-reset-requests")
+        )
     if retry_after:
         try:
             return float(retry_after)
@@ -147,7 +150,7 @@ def with_retry(fn: Callable[[], T], config: RetryConfig) -> T:
     raise last_exc  # type: ignore[misc]
 
 
-async def with_retry_async(fn: Callable[[], "asyncio.Future[T]"], config: RetryConfig) -> T:
+async def with_retry_async(fn: Callable[[], asyncio.Future[T]], config: RetryConfig) -> T:
     """
     Call async fn() with retry logic.
 

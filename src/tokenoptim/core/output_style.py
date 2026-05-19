@@ -13,7 +13,6 @@ Typical output token reduction: 40-75% depending on level.
 from __future__ import annotations
 
 from enum import Enum
-from typing import Optional
 
 
 class CompressionLevel(str, Enum):
@@ -129,8 +128,8 @@ class OutputCompressor:
     def __init__(
         self,
         level: CompressionLevel | str = CompressionLevel.STANDARD,
-        max_output_tokens: Optional[int] = None,
-        custom_exceptions: Optional[list[str]] = None,
+        max_output_tokens: int | None = None,
+        custom_exceptions: list[str] | None = None,
     ) -> None:
         self.level = CompressionLevel(level)
         self.max_output_tokens = max_output_tokens

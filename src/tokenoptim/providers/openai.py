@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import Any, Optional
+from typing import Any
 
 from tokenoptim.providers.base import BaseProvider
 
@@ -32,9 +32,9 @@ class OpenAIProvider(BaseProvider):
 
     def __init__(
         self,
-        api_key: Optional[str] = None,
+        api_key: str | None = None,
         model: str = "gpt-4o-mini",
-        base_url: Optional[str] = None,
+        base_url: str | None = None,
     ) -> None:
         try:
             from openai import OpenAI
@@ -58,7 +58,7 @@ class OpenAIProvider(BaseProvider):
     def chat(
         self,
         messages: list[dict],
-        system: Optional[str] = None,
+        system: str | None = None,
         max_tokens: int = 1024,
         **kwargs: Any,
     ) -> dict:
@@ -85,7 +85,7 @@ class OpenAIProvider(BaseProvider):
             "raw": response,
         }
 
-    def count_tokens(self, messages: list[dict], system: Optional[str] = None) -> int:
+    def count_tokens(self, messages: list[dict], system: str | None = None) -> int:
         """Approximate token count (tiktoken if available, else char-based)."""
         try:
             import tiktoken

@@ -35,12 +35,13 @@ from __future__ import annotations
 
 import asyncio
 import logging
-from typing import Any, AsyncIterator, Optional
+from collections.abc import AsyncIterator
+from typing import Any
 
 from tokenoptim.core.compressor import PromptCompressor
-from tokenoptim.core.output_style import OutputCompressor, CompressionLevel
-from tokenoptim.core.memory import MemoryManager
 from tokenoptim.core.counter import TokenCounter
+from tokenoptim.core.memory import MemoryManager
+from tokenoptim.core.output_style import CompressionLevel, OutputCompressor
 from tokenoptim.core.retry import RetryConfig, with_retry_async
 
 logger = logging.getLogger("tokenoptim")
@@ -80,9 +81,9 @@ class AsyncOptimizedClient:
         output_level: str | CompressionLevel = CompressionLevel.STANDARD,
         memory_enabled: bool = True,
         memory_max_turns: int = 20,
-        token_budget: Optional[int] = None,
-        system: Optional[str] = None,
-        retry: Optional[RetryConfig] = None,
+        token_budget: int | None = None,
+        system: str | None = None,
+        retry: RetryConfig | None = None,
     ) -> None:
         self.provider = provider
         self._base_system = system or ""
@@ -147,7 +148,11 @@ class AsyncOptimizedClient:
         response["_prompt_stats"] = prompt_stats
 
         if self.counter.is_over_budget():
-            logger.warning("Token budget exceeded: %d / %d", self.counter.session_total.total_tokens, self.counter.budget)
+            logger.warning(
+                "Token budget exceeded: %d / %d",
+                self.counter.session_total.total_tokens,
+                self.counter.budget,
+            )
 
         return response
 
@@ -278,7 +283,9 @@ class AsyncOptimizedClient:
         print(f"Prompts    : {'compressed' if self.prompt_compressor else 'off'}")
         print(f"Output     : {self.output_compressor.level.value}")
         mem = self.memory.stats()
-        print(f"Memory     : {'ON' if mem['enabled'] else 'OFF'} | {mem['active_window_turns']} turns")
+        enabled = 'ON' if mem['enabled'] else 'OFF'
+        turns = mem['active_window_turns']
+        print(f"Memory     : {enabled} | {turns} turns")
         print(f"Tokens used: {self.counter.session_total.total_tokens}")
         print(f"API calls  : {self.counter.call_count}")
         print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n")

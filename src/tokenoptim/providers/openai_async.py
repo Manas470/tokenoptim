@@ -2,7 +2,8 @@
 
 from __future__ import annotations
 
-from typing import Any, AsyncIterator, Optional
+from collections.abc import AsyncIterator
+from typing import Any
 
 from tokenoptim.providers.base import BaseProvider
 
@@ -22,9 +23,9 @@ class AsyncOpenAIProvider(BaseProvider):
 
     def __init__(
         self,
-        api_key: Optional[str] = None,
+        api_key: str | None = None,
         model: str = "gpt-4o-mini",
-        base_url: Optional[str] = None,
+        base_url: str | None = None,
     ) -> None:
         try:
             from openai import AsyncOpenAI
@@ -49,7 +50,7 @@ class AsyncOpenAIProvider(BaseProvider):
     async def async_chat(
         self,
         messages: list[dict],
-        system: Optional[str] = None,
+        system: str | None = None,
         max_tokens: int = 1024,
         **kwargs: Any,
     ) -> dict:
@@ -74,7 +75,7 @@ class AsyncOpenAIProvider(BaseProvider):
     async def stream(
         self,
         messages: list[dict],
-        system: Optional[str] = None,
+        system: str | None = None,
         max_tokens: int = 1024,
         **kwargs: Any,
     ) -> AsyncIterator[str]:
@@ -102,7 +103,7 @@ class AsyncOpenAIProvider(BaseProvider):
             text = " ".join(str(m.get("content", "")) for m in messages)
             return len(text) // 4
 
-    def _inject_system(self, messages: list[dict], system: Optional[str]) -> list[dict]:
+    def _inject_system(self, messages: list[dict], system: str | None) -> list[dict]:
         all_messages = list(messages)
         if system and (not all_messages or all_messages[0].get("role") != "system"):
             all_messages.insert(0, {"role": "system", "content": system})

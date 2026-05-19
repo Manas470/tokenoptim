@@ -1,7 +1,7 @@
 """Tests for ResponseCache."""
 
 import time
-import pytest
+
 from tokenoptim.core.cache import ResponseCache
 
 SAMPLE_RESPONSE = {

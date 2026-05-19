@@ -1,6 +1,5 @@
 """Tests for MemoryManager."""
 
-import pytest
 from tokenoptim.core.memory import MemoryManager
 
 

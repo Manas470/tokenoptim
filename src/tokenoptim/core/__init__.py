@@ -1,7 +1,7 @@
-from tokenoptim.core.compressor import PromptCompressor, CompressionStats
-from tokenoptim.core.output_style import OutputCompressor, CompressionLevel
-from tokenoptim.core.memory import MemoryManager
+from tokenoptim.core.compressor import CompressionStats, PromptCompressor
 from tokenoptim.core.counter import TokenCounter, TokenUsage
+from tokenoptim.core.memory import MemoryManager
+from tokenoptim.core.output_style import CompressionLevel, OutputCompressor
 
 __all__ = [
     "PromptCompressor",

@@ -1,7 +1,6 @@
 """Tests for OutputCompressor."""
 
-import pytest
-from tokenoptim.core.output_style import OutputCompressor, CompressionLevel
+from tokenoptim.core.output_style import CompressionLevel, OutputCompressor
 
 
 def test_off_level_returns_base_system():

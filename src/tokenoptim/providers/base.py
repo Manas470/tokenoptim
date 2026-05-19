@@ -1,8 +1,9 @@
 """Abstract base class for LLM providers."""
 
 from __future__ import annotations
+
 from abc import ABC, abstractmethod
-from typing import Any, Optional
+from typing import Any
 
 
 class BaseProvider(ABC):
@@ -25,7 +26,7 @@ class BaseProvider(ABC):
     def chat(
         self,
         messages: list[dict],
-        system: Optional[str] = None,
+        system: str | None = None,
         max_tokens: int = 1024,
         **kwargs: Any,
     ) -> dict:
@@ -33,7 +34,7 @@ class BaseProvider(ABC):
         ...
 
     @abstractmethod
-    def count_tokens(self, messages: list[dict], system: Optional[str] = None) -> int:
+    def count_tokens(self, messages: list[dict], system: str | None = None) -> int:
         """Return approximate token count for the given messages."""
         ...
 

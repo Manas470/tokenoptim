@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import Any, Optional
+from typing import Any
 
 from tokenoptim.providers.base import BaseProvider
 
@@ -41,12 +41,12 @@ class OllamaProvider(BaseProvider):
     def chat(
         self,
         messages: list[dict],
-        system: Optional[str] = None,
+        system: str | None = None,
         max_tokens: int = 1024,
         **kwargs: Any,
     ) -> dict:
-        import urllib.request
         import json
+        import urllib.request
 
         all_messages = list(messages)
         if system and (not all_messages or all_messages[0].get("role") != "system"):
@@ -83,7 +83,7 @@ class OllamaProvider(BaseProvider):
             "raw": data,
         }
 
-    def count_tokens(self, messages: list[dict], system: Optional[str] = None) -> int:
+    def count_tokens(self, messages: list[dict], system: str | None = None) -> int:
         text = " ".join(str(m.get("content", "")) for m in messages)
         if system:
             text += " " + system

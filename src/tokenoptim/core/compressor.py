@@ -14,10 +14,9 @@ Typical reduction: 25-45% on real-world prompts.
 
 from __future__ import annotations
 
-import re
 import hashlib
-from dataclasses import dataclass, field
-from typing import Optional
+import re
+from dataclasses import dataclass
 
 # ---------------------------------------------------------------------------
 # Patterns that waste tokens without adding meaning

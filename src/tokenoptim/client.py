@@ -25,14 +25,14 @@ Quick start
 from __future__ import annotations
 
 import logging
-from typing import Any, Optional
+from typing import Any
 
-from tokenoptim.core.compressor import PromptCompressor
-from tokenoptim.core.output_style import OutputCompressor, CompressionLevel
-from tokenoptim.core.memory import MemoryManager
-from tokenoptim.core.counter import TokenCounter
-from tokenoptim.core.retry import RetryConfig, with_retry
 from tokenoptim.core.cache import ResponseCache
+from tokenoptim.core.compressor import PromptCompressor
+from tokenoptim.core.counter import TokenCounter
+from tokenoptim.core.memory import MemoryManager
+from tokenoptim.core.output_style import CompressionLevel, OutputCompressor
+from tokenoptim.core.retry import RetryConfig, with_retry
 from tokenoptim.providers.base import BaseProvider
 
 logger = logging.getLogger("tokenoptim")
@@ -74,10 +74,10 @@ class OptimizedClient:
         output_level: str | CompressionLevel = CompressionLevel.STANDARD,
         memory_enabled: bool = True,
         memory_max_turns: int = 20,
-        token_budget: Optional[int] = None,
-        system: Optional[str] = None,
-        retry: Optional[RetryConfig] = None,
-        cache: Optional[ResponseCache] = None,
+        token_budget: int | None = None,
+        system: str | None = None,
+        retry: RetryConfig | None = None,
+        cache: ResponseCache | None = None,
     ) -> None:
         self.provider = provider
         self._base_system = system or ""
@@ -227,7 +227,11 @@ class OptimizedClient:
         """Print a full status report."""
         print("\n━━━━ tokenoptim status ━━━━")
         print(f"Provider   : {self.provider.provider_name}")
-        print(f"Prompts    : {'compressed (' + (self.prompt_compressor.level if self.prompt_compressor else 'off') + ')' }")
+        if self.prompt_compressor:
+            prompt_info = f'compressed ({self.prompt_compressor.level})'
+        else:
+            prompt_info = 'off'
+        print(f"Prompts    : {prompt_info}")
         print(f"Output     : {self.output_compressor.level.value} "
               f"(est. {OutputCompressor.estimate_savings(self.output_compressor.level)} savings)")
         mem = self.memory.stats()
@@ -235,5 +239,6 @@ class OptimizedClient:
               f"{mem['active_window_turns']} turns | "
               f"~{mem['estimated_window_tokens']} tokens")
         if self.counter.budget:
-            print(f"Budget     : {self.counter.session_total.total_tokens} / {self.counter.budget} tokens used")
+            used = self.counter.session_total.total_tokens
+            print(f"Budget     : {used} / {self.counter.budget} tokens used")
         print("━━━━━━━━━━━━━━━━━━━━━━━━━━\n")

@@ -1,7 +1,8 @@
 """Tests for RetryConfig and with_retry."""
 
 import pytest
-from tokenoptim.core.retry import RetryConfig, with_retry, _is_retriable
+
+from tokenoptim.core.retry import RetryConfig, _is_retriable, with_retry
 
 
 class _FakeRateLimitError(Exception):
@@ -68,8 +69,11 @@ def test_is_retriable_by_status_code():
 
 
 def test_is_retriable_by_class_name():
-    class RateLimitError(Exception): pass
-    class APIConnectionError(Exception): pass
+    class RateLimitError(Exception):
+        pass
+
+    class APIConnectionError(Exception):
+        pass
     assert _is_retriable(RateLimitError())
     assert _is_retriable(APIConnectionError())
 

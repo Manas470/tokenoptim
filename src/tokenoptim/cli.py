@@ -124,6 +124,7 @@ def cmd_compress(args) -> None:
 def cmd_bench(args) -> None:
     """Benchmark compression on a file (one prompt per line)."""
     import statistics
+
     from tokenoptim.core.compressor import PromptCompressor
 
     prompts = [p for p in Path(args.input).read_text(encoding="utf-8").splitlines() if p.strip()]
@@ -153,7 +154,10 @@ def cmd_install_claude(args) -> None:
     marker = "<!-- tokenoptim -->"
 
     if target.exists() and marker in target.read_text(encoding="utf-8"):
-        print(f"tokenoptim already in {target}. Remove the <!-- tokenoptim --> block to re-install.")
+        print(
+            f"tokenoptim already in {target}. "
+            "Remove the <!-- tokenoptim --> block to re-install."
+        )
         return
 
     skill = _skill_text(level)

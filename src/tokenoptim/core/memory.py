@@ -17,7 +17,6 @@ from __future__ import annotations
 
 import time
 from dataclasses import dataclass, field
-from typing import Optional
 
 
 @dataclass
@@ -80,8 +79,8 @@ class MemoryManager:
         self,
         enabled: bool = True,
         max_turns: int = 20,
-        max_tokens: Optional[int] = None,
-        compaction_summary_prompt: Optional[str] = None,
+        max_tokens: int | None = None,
+        compaction_summary_prompt: str | None = None,
         keep_system_message: bool = True,
     ) -> None:
         self.enabled = enabled
@@ -93,8 +92,8 @@ class MemoryManager:
         self.keep_system_message = keep_system_message
 
         self._history: list[Turn] = []
-        self._system_message: Optional[str] = None
-        self._compaction_summary: Optional[str] = None
+        self._system_message: str | None = None
+        self._compaction_summary: str | None = None
         self._total_turns_added: int = 0
 
     # ------------------------------------------------------------------
@@ -185,7 +184,7 @@ class MemoryManager:
         """Return the last max_turns turns."""
         return self._history[-self.max_turns * 2:]  # *2 because each pair = 2 turns
 
-    def _last_user_turn(self) -> Optional[Turn]:
+    def _last_user_turn(self) -> Turn | None:
         for turn in reversed(self._history):
             if turn.role == "user":
                 return turn

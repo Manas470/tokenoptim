@@ -26,9 +26,8 @@ from __future__ import annotations
 
 import logging
 from dataclasses import dataclass
-from typing import Optional
 
-from tokenoptim.core.compressor import PromptCompressor, CompressionStats
+from tokenoptim.core.compressor import PromptCompressor
 
 logger = logging.getLogger("tokenoptim.ml_compressor")
 
@@ -88,7 +87,7 @@ class MLPromptCompressor:
         model_name: str = "microsoft/llmlingua-2-bert-base-multilingual-cased-meetingbank",
         use_sentence_level: bool = False,
         fallback_level: str = "full",
-        device: Optional[str] = None,
+        device: str | None = None,
     ) -> None:
         if not 0.1 <= target_token_rate <= 0.9:
             raise ValueError("target_token_rate must be between 0.1 and 0.9")

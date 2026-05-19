@@ -1,8 +1,8 @@
 """Tests for PromptCompressor."""
 
 import pytest
-from tokenoptim.core.compressor import PromptCompressor, CompressionStats
 
+from tokenoptim.core.compressor import PromptCompressor
 
 VERBOSE = (
     "Could you please help me understand what tokenization means? "

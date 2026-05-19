@@ -7,8 +7,7 @@ Supports Anthropic, OpenAI, and approximate counting for others.
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
-from typing import Optional
+from dataclasses import dataclass
 
 
 @dataclass
@@ -27,7 +26,7 @@ class TokenUsage:
         """Tokens that will be billed (cache reads are cheap)."""
         return self.input_tokens + self.output_tokens + self.cache_write_tokens
 
-    def __add__(self, other: "TokenUsage") -> "TokenUsage":
+    def __add__(self, other: TokenUsage) -> TokenUsage:
         return TokenUsage(
             input_tokens=self.input_tokens + other.input_tokens,
             output_tokens=self.output_tokens + other.output_tokens,
@@ -62,7 +61,7 @@ class TokenCounter:
     >>> counter.report()
     """
 
-    def __init__(self, budget: Optional[int] = None) -> None:
+    def __init__(self, budget: int | None = None) -> None:
         self.budget = budget
         self._calls: list[TokenUsage] = []
 
@@ -118,7 +117,7 @@ class TokenCounter:
             return False
         return self.session_total.effective_tokens > self.budget
 
-    def remaining_budget(self) -> Optional[int]:
+    def remaining_budget(self) -> int | None:
         if self.budget is None:
             return None
         return max(0, self.budget - self.session_total.effective_tokens)

@@ -2,10 +2,11 @@
 Tests for AsyncOptimizedClient — uses a mock async provider, no real API calls.
 """
 
-import pytest
 from unittest.mock import AsyncMock, MagicMock
+
+import pytest
+
 from tokenoptim.async_client import AsyncOptimizedClient
-from tokenoptim.core.retry import RetryConfig
 
 
 def _make_response(content="Hello from mock", input_tokens=10, output_tokens=5):

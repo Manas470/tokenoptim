@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import Any, Optional
+from typing import Any
 
 from tokenoptim.providers.base import BaseProvider
 
@@ -30,7 +30,7 @@ class AnthropicProvider(BaseProvider):
 
     def __init__(
         self,
-        api_key: Optional[str] = None,
+        api_key: str | None = None,
         model: str = "claude-sonnet-4-6",
         enable_caching: bool = True,
     ) -> None:
@@ -53,7 +53,7 @@ class AnthropicProvider(BaseProvider):
     def chat(
         self,
         messages: list[dict],
-        system: Optional[str] = None,
+        system: str | None = None,
         max_tokens: int = 1024,
         **kwargs: Any,
     ) -> dict:
@@ -93,7 +93,7 @@ class AnthropicProvider(BaseProvider):
             "raw": response,
         }
 
-    def count_tokens(self, messages: list[dict], system: Optional[str] = None) -> int:
+    def count_tokens(self, messages: list[dict], system: str | None = None) -> int:
         """Use Anthropic's token counting API."""
         try:
             kwargs: dict[str, Any] = {"model": self.model, "messages": messages}

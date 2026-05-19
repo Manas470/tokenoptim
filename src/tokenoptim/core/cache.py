@@ -25,15 +25,13 @@ from __future__ import annotations
 import hashlib
 import json
 import logging
-import os
 import time
 from pathlib import Path
-from typing import Optional
 
 logger = logging.getLogger("tokenoptim.cache")
 
 
-def _hash_key(messages: list[dict], system: Optional[str], model: str) -> str:
+def _hash_key(messages: list[dict], system: str | None, model: str) -> str:
     """Deterministic SHA-256 key for a (messages, system, model) triple."""
     payload = json.dumps(
         {"messages": messages, "system": system or "", "model": model},
@@ -70,9 +68,9 @@ class ResponseCache:
 
     def __init__(
         self,
-        directory: Optional[str | Path] = None,
+        directory: str | Path | None = None,
         max_memory_entries: int = 256,
-        ttl_seconds: Optional[int] = None,
+        ttl_seconds: int | None = None,
         enabled: bool = True,
     ) -> None:
         self.enabled = enabled
@@ -81,7 +79,7 @@ class ResponseCache:
         self._memory: dict[str, dict] = {}   # key → response dict
         self._timestamps: dict[str, float] = {}  # key → set time
 
-        self._disk_dir: Optional[Path] = None
+        self._disk_dir: Path | None = None
         if directory:
             self._disk_dir = Path(directory).expanduser().resolve()
             self._disk_dir.mkdir(parents=True, exist_ok=True)
@@ -97,12 +95,12 @@ class ResponseCache:
     def make_key(
         self,
         messages: list[dict],
-        system: Optional[str] = None,
+        system: str | None = None,
         model: str = "",
     ) -> str:
         return _hash_key(messages, system, model)
 
-    def get(self, key: str) -> Optional[dict]:
+    def get(self, key: str) -> dict | None:
         """Return cached response or None if not found / expired."""
         if not self.enabled:
             return None

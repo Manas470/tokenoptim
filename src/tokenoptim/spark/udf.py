@@ -20,7 +20,7 @@ Example
 
 from __future__ import annotations
 
-from typing import Optional, TYPE_CHECKING
+from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     pass  # Avoid import-time PySpark dependency
@@ -47,7 +47,7 @@ def compress_prompts_udf(level: str = "medium"):
     """
     try:
         from pyspark.sql.functions import udf
-        from pyspark.sql.types import StructType, StructField, StringType, IntegerType
+        from pyspark.sql.types import IntegerType, StringType, StructField, StructType
     except ImportError as e:
         raise ImportError(
             "pyspark not installed. Run: pip install pyspark"
@@ -64,7 +64,7 @@ def compress_prompts_udf(level: str = "medium"):
             StructField("reduction_pct", IntegerType(), False),
         ])
     )
-    def _compress(text: Optional[str]):
+    def _compress(text: str | None):
         if text is None:
             return ("", 0, 0, 0)
         # Import inside UDF — each executor gets its own Python process
@@ -105,6 +105,7 @@ def batch_compress(
     list of (compressed_text, stats_dict) tuples.
     """
     from concurrent.futures import ThreadPoolExecutor
+
     from tokenoptim.core.compressor import PromptCompressor
 
     compressor = PromptCompressor(level=level)
