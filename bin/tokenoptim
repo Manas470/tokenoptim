@@ -1,0 +1,277 @@
+#!/usr/bin/env bash
+# tokenoptim — token optimization for any LLM CLI
+# Works with: claude (Claude Code), gemini, codex, aider, sgpt, llm, or any tool
+# that accepts a --system or similar flag.
+#
+# Usage:
+#   tokenoptim skill [lite|standard|full|ultra|ancient]
+#       → print the skill system prompt (pipe into any LLM tool)
+#
+#   tokenoptim compress "your verbose prompt"
+#       → compress a prompt, print result to stdout
+#
+#   tokenoptim wrap [--level LEVEL] -- <LLM_COMMAND> [args...]
+#       → prepend tokenoptim system prompt to any LLM CLI call
+#
+#   tokenoptim claude "your question"           (shortcut for claude)
+#   tokenoptim gemini "your question"           (shortcut for gemini)
+#   tokenoptim codex  "your question"           (shortcut for codex)
+#
+# Examples:
+#   tokenoptim skill full | pbcopy
+#   tokenoptim wrap --level full -- claude "explain kubernetes"
+#   tokenoptim wrap --level ultra -- gemini "write a redis cache class"
+#   tokenoptim compress "Could you please help me understand tokenization?"
+#
+# Install:
+#   pip install tokenoptim         (Python package + this CLI)
+#   # or just add this file to your PATH:
+#   chmod +x bin/tokenoptim && ln -s "$(pwd)/bin/tokenoptim" /usr/local/bin/tokenoptim
+
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+SKILLS_DIR="$(cd "$SCRIPT_DIR/../skills" && pwd)"
+DEFAULT_LEVEL="standard"
+
+# ── Helpers ──────────────────────────────────────────────────────────────────
+
+usage() {
+  cat <<EOF
+tokenoptim v0.2.0 — cut LLM token costs by 40-75%
+
+USAGE
+  tokenoptim skill [LEVEL]          Print skill system prompt (default: standard)
+  tokenoptim compress TEXT          Compress a prompt (Python required)
+  tokenoptim wrap [--level L] -- CMD [ARGS...]
+                                    Inject compression into any LLM CLI call
+  tokenoptim claude  "question"     Shortcut: claude with standard compression
+  tokenoptim gemini  "question"     Shortcut: gemini with standard compression
+  tokenoptim codex   "question"     Shortcut: codex with standard compression
+  tokenoptim levels                 Show all levels and token savings
+  tokenoptim install-claude         Append skill to your project's CLAUDE.md
+  tokenoptim install-global         Install skill globally (~/CLAUDE.md)
+
+LEVELS
+  lite      ~20% output reduction — strip pleasantries only
+  standard  ~40% output reduction — terse engineer mode (DEFAULT)
+  full      ~60% output reduction — caveman mode
+  ultra     ~70% output reduction — symbols + fragments
+  ancient   ~75% output reduction — stone tablet mode
+
+EXAMPLES
+  # Use with Claude Code (pipe skill into clipboard, paste into CLAUDE.md)
+  tokenoptim skill full | pbcopy
+
+  # Wrap any CLI tool
+  tokenoptim wrap --level full -- claude "explain distributed consensus"
+  tokenoptim wrap --level ultra -- gemini "write a quicksort in Rust"
+  tokenoptim wrap --level full -- aider --model gpt-4o
+
+  # Compress a prompt before sending
+  tokenoptim compress "Could you please help me understand what async/await means?"
+
+  # Install into current project (Claude Code picks up CLAUDE.md automatically)
+  tokenoptim install-claude --level full
+EOF
+}
+
+get_skill_path() {
+  local level="${1:-$DEFAULT_LEVEL}"
+  local path="$SKILLS_DIR/$level/SKILL.md"
+  if [[ ! -f "$path" ]]; then
+    echo "Error: unknown level '$level'. Valid: lite standard full ultra ancient" >&2
+    exit 1
+  fi
+  echo "$path"
+}
+
+cmd_skill() {
+  local level="${1:-$DEFAULT_LEVEL}"
+  cat "$(get_skill_path "$level")"
+}
+
+cmd_levels() {
+  echo ""
+  echo "  tokenoptim compression levels"
+  echo "  ─────────────────────────────────────────"
+  printf "  %-10s %-22s %s\n" "LEVEL" "OUTPUT SAVINGS" "DESCRIPTION"
+  printf "  %-10s %-22s %s\n" "lite"     "~20% output tokens"  "strip pleasantries"
+  printf "  %-10s %-22s %s\n" "standard" "~40% output tokens"  "terse engineer (default)"
+  printf "  %-10s %-22s %s\n" "full"     "~60% output tokens"  "caveman mode"
+  printf "  %-10s %-22s %s\n" "ultra"    "~70% output tokens"  "symbols + fragments"
+  printf "  %-10s %-22s %s\n" "ancient"  "~75% output tokens"  "stone tablet"
+  echo ""
+  echo "  Prompt compression (requires Python): tokenoptim compress TEXT"
+  echo "  Prompt levels: light (~15%) | medium (~30%) | full (~40%)"
+  echo ""
+}
+
+cmd_compress() {
+  if [[ -z "${1:-}" ]]; then
+    echo "Usage: tokenoptim compress \"your prompt text\"" >&2
+    exit 1
+  fi
+  if ! command -v python3 &>/dev/null && ! command -v python &>/dev/null; then
+    echo "Error: Python not found. Install Python 3.9+ to use prompt compression." >&2
+    exit 1
+  fi
+  local py="${PYTHON:-$(command -v python3 2>/dev/null || command -v python)}"
+  "$py" -c "
+import sys
+sys.path.insert(0, '$(cd "$SCRIPT_DIR/.." && pwd)/src')
+from tokenoptim.core.compressor import PromptCompressor
+text = sys.argv[1]
+for level in ['light', 'medium', 'full']:
+    c = PromptCompressor(level=level)
+    compressed, stats = c.compress(text)
+    print(f'[{level:6}] {stats.token_reduction_pct:4.1f}% reduction: {compressed[:120]}')
+" "$1"
+}
+
+# ── wrap: inject skill into any LLM CLI call ─────────────────────────────────
+# Detects the tool and passes the system prompt the right way.
+# Supported: claude, gemini, codex, aider, sgpt, llm, ollama, any custom tool.
+
+cmd_wrap() {
+  local level="$DEFAULT_LEVEL"
+
+  # Parse --level flag
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      --level|-l) level="$2"; shift 2 ;;
+      --) shift; break ;;
+      *) break ;;
+    esac
+  done
+
+  if [[ $# -eq 0 ]]; then
+    echo "Usage: tokenoptim wrap [--level LEVEL] -- COMMAND [ARGS...]" >&2
+    exit 1
+  fi
+
+  local skill_text
+  skill_text="$(cmd_skill "$level")"
+  local cmd="$1"; shift
+
+  # Detect tool and inject system prompt correctly
+  case "$(basename "$cmd")" in
+    claude)
+      # Claude Code CLI: --system-prompt flag or CLAUDE.md injection
+      # Claude Code doesn't have a --system flag; instead write a temp CLAUDE.md
+      local tmpfile
+      tmpfile="$(mktemp /tmp/tokenoptim-CLAUDE-XXXXXX.md)"
+      printf '%s\n' "$skill_text" > "$tmpfile"
+      CLAUDE_SYSTEM_PROMPT_FILE="$tmpfile" "$cmd" "$@"
+      rm -f "$tmpfile"
+      ;;
+    gemini)
+      # Gemini CLI: --system flag
+      "$cmd" --system "$skill_text" "$@"
+      ;;
+    codex)
+      # OpenAI Codex CLI: --system flag
+      "$cmd" --system "$skill_text" "$@"
+      ;;
+    aider)
+      # Aider: --system-prompt flag
+      "$cmd" --system-prompt "$skill_text" "$@"
+      ;;
+    sgpt|shell-gpt)
+      # shell-gpt: --role or pipe
+      echo "$skill_text" | "$cmd" --stdin "$@"
+      ;;
+    llm)
+      # simonw/llm: --system flag
+      "$cmd" --system "$skill_text" "$@"
+      ;;
+    ollama)
+      # Ollama: MODELFILE system or prompt prefix
+      "$cmd" run "$@" --system "$skill_text"
+      ;;
+    *)
+      # Generic fallback: try --system, then SYSTEM env var
+      SYSTEM="$skill_text" "$cmd" "$@" 2>/dev/null || \
+      "$cmd" --system "$skill_text" "$@"
+      ;;
+  esac
+}
+
+# ── Shortcuts ─────────────────────────────────────────────────────────────────
+
+cmd_claude() {
+  local level="${TOKENOPTIM_LEVEL:-$DEFAULT_LEVEL}"
+  cmd_wrap --level "$level" -- claude "$@"
+}
+
+cmd_gemini() {
+  local level="${TOKENOPTIM_LEVEL:-$DEFAULT_LEVEL}"
+  local skill_text; skill_text="$(cmd_skill "$level")"
+  gemini --system "$skill_text" "$@"
+}
+
+cmd_codex() {
+  local level="${TOKENOPTIM_LEVEL:-$DEFAULT_LEVEL}"
+  local skill_text; skill_text="$(cmd_skill "$level")"
+  codex --system "$skill_text" "$@"
+}
+
+# ── Install helpers ────────────────────────────────────────────────────────────
+
+cmd_install_claude() {
+  local level="$DEFAULT_LEVEL"
+  local target="./CLAUDE.md"
+
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      --level|-l) level="$2"; shift 2 ;;
+      --global) target="$HOME/CLAUDE.md"; shift ;;
+      *) shift ;;
+    esac
+  done
+
+  local skill_text; skill_text="$(cmd_skill "$level")"
+  local marker="<!-- tokenoptim -->"
+
+  if [[ -f "$target" ]] && grep -q "$marker" "$target" 2>/dev/null; then
+    echo "tokenoptim already installed in $target. To update, remove the section and re-run."
+    exit 0
+  fi
+
+  {
+    echo ""
+    echo "$marker"
+    echo "$skill_text"
+    echo "<!-- /tokenoptim -->"
+  } >> "$target"
+
+  echo "✅ tokenoptim/$level installed into $target"
+  echo "   Claude Code will pick this up automatically on next run."
+}
+
+cmd_install_global() {
+  cmd_install_claude --global "$@"
+}
+
+# ── Main dispatch ──────────────────────────────────────────────────────────────
+
+CMD="${1:-help}"
+shift || true
+
+case "$CMD" in
+  skill)        cmd_skill "$@" ;;
+  compress)     cmd_compress "$@" ;;
+  wrap)         cmd_wrap "$@" ;;
+  levels)       cmd_levels ;;
+  claude)       cmd_claude "$@" ;;
+  gemini)       cmd_gemini "$@" ;;
+  codex)        cmd_codex "$@" ;;
+  install-claude) cmd_install_claude "$@" ;;
+  install-global) cmd_install_global "$@" ;;
+  help|--help|-h) usage ;;
+  *)
+    echo "Unknown command: $CMD" >&2
+    usage
+    exit 1
+    ;;
+esac
