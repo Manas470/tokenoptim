@@ -6,12 +6,12 @@ Format: [Semantic Versioning](https://semver.org/).
 ## [0.2.0] — 2026-05-19
 
 ### Added (CLI-first release)
-- `tokenoptim install-claude --level LEVEL` — append caveman skill to CLAUDE.md (auto-loaded by Claude Code)
-- `tokenoptim install-global` — install skill to ~/CLAUDE.md for all projects
-- `tokenoptim wrap --level LEVEL -- CMD` — inject skill into gemini, codex, aider, sgpt, llm, ollama, or any LLM CLI
-- `tokenoptim skill LEVEL` — print skill to stdout (pipeable anywhere)
+- `llm-tokenoptim install-claude --level LEVEL` — append caveman skill to CLAUDE.md (auto-loaded by Claude Code)
+- `llm-tokenoptim install-global` — install skill to ~/CLAUDE.md for all projects
+- `llm-tokenoptim wrap --level LEVEL -- CMD` — inject skill into gemini, codex, aider, sgpt, llm, ollama, or any LLM CLI
+- `llm-tokenoptim skill LEVEL` — print skill to stdout (pipeable anywhere)
 - `skills/` directory with 5 SKILL.md files: lite / standard / full / ultra / ancient
-- `bin/tokenoptim` — pure-bash wrapper (works without Python)
+- `bin/llm-tokenoptim` — pure-bash wrapper (works without Python)
 - `AsyncOptimizedClient` — full async/await client with streaming and batch support
 - `AsyncAnthropicProvider` and `AsyncOpenAIProvider` with `async_chat()` and `stream()`
 - `batch_chat()` — concurrent API calls with configurable semaphore
@@ -19,7 +19,7 @@ Format: [Semantic Versioning](https://semver.org/).
 - `ResponseCache` — disk-backed LRU cache with TTL; survives restarts
 - `MLPromptCompressor` — LLMLingua integration for 40–60% ML-based compression
 - `benchmarks/run_benchmark.py` — reproducible benchmark against ShareGPT dataset
-- `[ml]` optional extra: `pip install "tokenoptim[ml]"`
+- `[ml]` optional extra: `pip install "llm-tokenoptim[ml]"`
 
 ### Fixed
 - Deduplicate min_len threshold reduced 80→40 (catches more realistic duplicates)
@@ -39,6 +39,6 @@ Format: [Semantic Versioning](https://semver.org/).
 - `OptimizedClient` — sync unified client
 - Providers: `AnthropicProvider`, `OpenAIProvider`, `OllamaProvider`
 - `SparkTokenOptimizer` + `compress_prompts_udf` — PySpark batch support
-- CLI: `tokenoptim compress / bench / levels`
+- CLI: `llm-tokenoptim compress / bench / levels`
 - GitHub Actions CI (Python 3.9–3.12)
 - 23 unit tests

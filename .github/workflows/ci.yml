@@ -30,7 +30,7 @@ jobs:
         run: ruff check src/ tests/
 
       - name: Type check (mypy)
-        run: mypy src/tokenoptim --ignore-missing-imports
+        run: mypy src/llm-tokenoptim --ignore-missing-imports
         continue-on-error: true   # non-blocking until full annotation pass
 
       - name: Run tests

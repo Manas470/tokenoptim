@@ -1,35 +1,35 @@
-# 🪨 tokenoptim
+# 🪨 llm-tokenoptim
 
 > **Cut LLM token costs by 40–75% — no API key required.**  
 > Works as a CLI tool for Claude Code, Gemini CLI, Codex, aider, and any LLM tool.  
 > Optional Python SDK for Anthropic · OpenAI · Ollama · PySpark batch.
 
-[![PyPI](https://img.shields.io/pypi/v/tokenoptim)](https://pypi.org/project/tokenoptim/)
-[![Python](https://img.shields.io/pypi/pyversions/tokenoptim)](https://pypi.org/project/tokenoptim/)
-[![CI](https://github.com/manasmourya/tokenoptim/actions/workflows/ci.yml/badge.svg)](https://github.com/manasmourya/tokenoptim/actions)
+[![PyPI](https://img.shields.io/pypi/v/llm-tokenoptim)](https://pypi.org/project/llm-tokenoptim/)
+[![Python](https://img.shields.io/pypi/pyversions/llm-tokenoptim)](https://pypi.org/project/llm-tokenoptim/)
+[![CI](https://github.com/manasmourya/llm-tokenoptim/actions/workflows/ci.yml/badge.svg)](https://github.com/manasmourya/llm-tokenoptim/actions)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![Downloads](https://img.shields.io/pypi/dm/tokenoptim)](https://pypi.org/project/tokenoptim/)
+[![Downloads](https://img.shields.io/pypi/dm/llm-tokenoptim)](https://pypi.org/project/llm-tokenoptim/)
 
 ---
 
 ## 30-second start (no API key needed)
 
 ```bash
-pip install tokenoptim
+pip install llm-tokenoptim
 
 # Inject caveman compression into Claude Code (auto-loaded via CLAUDE.md)
-tokenoptim install-claude --level full
+llm-tokenoptim install-claude --level full
 
 # Pipe skill into any LLM tool manually
-tokenoptim skill full | pbcopy          # macOS clipboard → paste into any chat
+llm-tokenoptim skill full | pbcopy          # macOS clipboard → paste into any chat
 
 # Wrap ANY LLM CLI tool — works with gemini, codex, aider, sgpt, llm, ollama
-tokenoptim wrap --level full -- gemini "explain kubernetes networking"
-tokenoptim wrap --level ultra -- claude "write a redis cache class"
-tokenoptim wrap --level standard -- aider --model gpt-4o
+llm-tokenoptim wrap --level full -- gemini "explain kubernetes networking"
+llm-tokenoptim wrap --level ultra -- claude "write a redis cache class"
+llm-tokenoptim wrap --level standard -- aider --model gpt-4o
 
 # Compress a verbose prompt before sending
-tokenoptim compress "Could you please help me understand what tokenization means in the context of large language models?"
+llm-tokenoptim compress "Could you please help me understand what tokenization means in the context of large language models?"
 ```
 
 **Five compression levels — no API, no GPU, <0.1ms overhead:**
@@ -50,7 +50,7 @@ tokenoptim compress "Could you please help me understand what tokenization means
 
 Every LLM API call burns money proportional to token count. Most teams waste tokens in predictable, fixable ways:
 
-| Waste source | Typical overhead | tokenoptim fix |
+| Waste source | Typical overhead | llm-tokenoptim fix |
 |---|---|---|
 | Verbose prompts ("Could you please help me...") | +15–30% input tokens | Regex prompt compressor |
 | Pleasantries in output ("Great question! Certainly!") | +40–75% output tokens | 6-level output compressor |
@@ -73,7 +73,7 @@ Every LLM API call burns money proportional to token count. Most teams waste tok
 | `medium` | 12% | 11% | 24% | <0.1ms |
 | `full` | 14% | 12% | 26% | <0.1ms |
 
-> **With LLMLingua ML backend** (`pip install "tokenoptim[ml]"`): 40–60% reduction on verbose prompts. Install the extra to unlock it — the library falls back to regex automatically if not present.
+> **With LLMLingua ML backend** (`pip install "llm-tokenoptim[ml]"`): 40–60% reduction on verbose prompts. Install the extra to unlock it — the library falls back to regex automatically if not present.
 
 ### Output Compression (via system prompt injection)
 
@@ -93,14 +93,14 @@ Every LLM API call burns money proportional to token count. Most teams waste tok
 
 ```bash
 # Core library — zero dependencies
-pip install tokenoptim
+pip install llm-tokenoptim
 
 # With providers
-pip install "tokenoptim[anthropic]"   # Claude (async + streaming)
-pip install "tokenoptim[openai]"      # OpenAI / Groq / Together
-pip install "tokenoptim[spark]"       # PySpark batch compression
-pip install "tokenoptim[ml]"          # LLMLingua ML compression (40-60%)
-pip install "tokenoptim[all]"         # Everything
+pip install "llm-tokenoptim[anthropic]"   # Claude (async + streaming)
+pip install "llm-tokenoptim[openai]"      # OpenAI / Groq / Together
+pip install "llm-tokenoptim[spark]"       # PySpark batch compression
+pip install "llm-tokenoptim[ml]"          # LLMLingua ML compression (40-60%)
+pip install "llm-tokenoptim[all]"         # Everything
 ```
 
 ---
@@ -110,7 +110,7 @@ pip install "tokenoptim[all]"         # Everything
 ### Compress a prompt — no LLM, no API key
 
 ```python
-from tokenoptim import PromptCompressor
+from llm-tokenoptim import PromptCompressor
 
 c = PromptCompressor(level="medium")
 compressed, stats = c.compress(
@@ -125,8 +125,8 @@ print(stats)
 
 ```python
 import asyncio
-from tokenoptim import AsyncOptimizedClient
-from tokenoptim.providers import AsyncAnthropicProvider
+from llm-tokenoptim import AsyncOptimizedClient
+from llm-tokenoptim.providers import AsyncAnthropicProvider
 
 async def main():
     client = AsyncOptimizedClient(
@@ -160,8 +160,8 @@ asyncio.run(main())
 ### Sync client (simpler, same optimizations)
 
 ```python
-from tokenoptim import OptimizedClient
-from tokenoptim.providers import AnthropicProvider
+from llm-tokenoptim import OptimizedClient
+from llm-tokenoptim.providers import AnthropicProvider
 
 client = OptimizedClient(
     provider=AnthropicProvider(),
@@ -176,8 +176,8 @@ print(resp["content"])
 ### ML-powered compression (40–60% input reduction)
 
 ```python
-# pip install "tokenoptim[ml]"
-from tokenoptim.core.ml_compressor import MLPromptCompressor
+# pip install "llm-tokenoptim[ml]"
+from llm-tokenoptim.core.ml_compressor import MLPromptCompressor
 
 c = MLPromptCompressor(target_token_rate=0.5)   # keep 50% → 50% reduction
 compressed, stats = c.compress(very_long_prompt)
@@ -190,10 +190,10 @@ Falls back to regex automatically if `llmlingua` is not installed.
 ### Response caching — avoid duplicate API calls
 
 ```python
-from tokenoptim import ResponseCache, OptimizedClient
-from tokenoptim.providers import AnthropicProvider
+from llm-tokenoptim import ResponseCache, OptimizedClient
+from llm-tokenoptim.providers import AnthropicProvider
 
-cache = ResponseCache(directory="~/.cache/tokenoptim", ttl_seconds=3600)
+cache = ResponseCache(directory="~/.cache/llm-tokenoptim", ttl_seconds=3600)
 provider = AnthropicProvider()
 
 messages = [{"role": "user", "content": "What is tokenization?"}]
@@ -237,7 +237,7 @@ client.clear_memory()     # Wipe history
 Automatic exponential backoff on 429 / 5xx — configured at construction:
 
 ```python
-from tokenoptim import RetryConfig, AsyncOptimizedClient
+from llm-tokenoptim import RetryConfig, AsyncOptimizedClient
 
 client = AsyncOptimizedClient(
     provider=...,
@@ -259,9 +259,9 @@ Compress millions of prompts before sending to any LLM:
 
 ```python
 from pyspark.sql import SparkSession
-from tokenoptim.spark import SparkTokenOptimizer
+from llm-tokenoptim.spark import SparkTokenOptimizer
 
-spark = SparkSession.builder.appName("tokenoptim").getOrCreate()
+spark = SparkSession.builder.appName("llm-tokenoptim").getOrCreate()
 df = spark.read.parquet("s3://bucket/raw-prompts/")
 
 optimizer = SparkTokenOptimizer(level="full", spark=spark)
@@ -269,7 +269,7 @@ df_out = optimizer.compress_dataframe(df, prompt_col="prompt")
 df_out.write.parquet("s3://bucket/compressed-prompts/")
 optimizer.savings_report(df, df_out)
 
-# ━━━━ tokenoptim PySpark Savings Report ━━━━
+# ━━━━ llm-tokenoptim PySpark Savings Report ━━━━
 # Prompts processed    : 4,500,000
 # Total original tokens: 892,400,000
 # Total compressed     : 768,000,000
@@ -286,25 +286,25 @@ With the `[ml]` extra, LLMLingua runs as a Spark UDF on each executor — 40–6
 
 ```bash
 # ── Skill injection (primary use — no API key needed) ─────────────────────────
-tokenoptim skill [lite|standard|full|ultra|ancient]   # print skill to stdout
-tokenoptim install-claude --level full                 # append to ./CLAUDE.md
-tokenoptim install-global --level standard             # append to ~/CLAUDE.md
+llm-tokenoptim skill [lite|standard|full|ultra|ancient]   # print skill to stdout
+llm-tokenoptim install-claude --level full                 # append to ./CLAUDE.md
+llm-tokenoptim install-global --level standard             # append to ~/CLAUDE.md
 
 # ── Wrap any LLM CLI tool ─────────────────────────────────────────────────────
-tokenoptim wrap --level full    -- gemini  "explain kubernetes"
-tokenoptim wrap --level ultra   -- claude  "write a redis cache class"
-tokenoptim wrap --level full    -- codex   "refactor this function"
-tokenoptim wrap --level standard -- aider  --model gpt-4o
-tokenoptim wrap --level full    -- llm     "summarize this doc"
-tokenoptim wrap --level ultra   -- ollama  run llama3
+llm-tokenoptim wrap --level full    -- gemini  "explain kubernetes"
+llm-tokenoptim wrap --level ultra   -- claude  "write a redis cache class"
+llm-tokenoptim wrap --level full    -- codex   "refactor this function"
+llm-tokenoptim wrap --level standard -- aider  --model gpt-4o
+llm-tokenoptim wrap --level full    -- llm     "summarize this doc"
+llm-tokenoptim wrap --level ultra   -- ollama  run llama3
 
 # ── Prompt compression (Python regex, <0.1ms, no API) ────────────────────────
-tokenoptim compress "Could you please help me understand what a token is?"
-tokenoptim compress --level full --file my_prompt.txt --output compressed.txt
+llm-tokenoptim compress "Could you please help me understand what a token is?"
+llm-tokenoptim compress --level full --file my_prompt.txt --output compressed.txt
 
 # ── Benchmarks ────────────────────────────────────────────────────────────────
-tokenoptim bench --input prompts.txt        # benchmark one prompt per line
-tokenoptim levels                           # show all levels and savings
+llm-tokenoptim bench --input prompts.txt        # benchmark one prompt per line
+llm-tokenoptim levels                           # show all levels and savings
 python benchmarks/run_benchmark.py --samples 500
 ```
 
@@ -313,7 +313,7 @@ python benchmarks/run_benchmark.py --samples 500
 ## Architecture
 
 ```
-src/tokenoptim/
+src/llm-tokenoptim/
 ├── core/
 │   ├── compressor.py      # Regex prompt compression (3 levels, <0.1ms)
 │   ├── ml_compressor.py   # LLMLingua ML compression (optional, 40–60%)
@@ -331,7 +331,7 @@ src/tokenoptim/
 ├── spark/udf.py           # PySpark UDF + SparkTokenOptimizer
 ├── client.py              # OptimizedClient (sync)
 ├── async_client.py        # AsyncOptimizedClient (async + batch + stream)
-└── cli.py                 # tokenoptim CLI
+└── cli.py                 # llm-tokenoptim CLI
 ```
 
 ---
@@ -349,8 +349,8 @@ Output compression savings (40–75%) apply to the **output side** and are syste
 ## Contributing
 
 ```bash
-git clone https://github.com/manasmourya/tokenoptim
-cd tokenoptim
+git clone https://github.com/manasmourya/llm-tokenoptim
+cd llm-tokenoptim
 pip install -e ".[dev]"
 pytest tests/ -v
 python benchmarks/run_benchmark.py --no-download

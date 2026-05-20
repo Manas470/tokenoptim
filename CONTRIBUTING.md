@@ -1,12 +1,12 @@
-# Contributing to tokenoptim
+# Contributing to llm-tokenoptim
 
 Thank you for taking the time to contribute.
 
 ## Setup
 
 ```bash
-git clone https://github.com/manasmourya/tokenoptim
-cd tokenoptim
+git clone https://github.com/manasmourya/llm-tokenoptim
+cd llm-tokenoptim
 pip install -e ".[dev]"
 ```
 
@@ -26,27 +26,27 @@ pytest tests/ -v
 
 1. **Tests pass**: `pytest tests/ -p no:cacheprovider`
 2. **Lint clean**: `ruff check src/ tests/`
-3. **Types check**: `mypy src/tokenoptim/`
+3. **Types check**: `mypy src/llm-tokenoptim/`
 4. **Benchmark still runs**: `python benchmarks/run_benchmark.py --no-download --samples 20`
 
 ## Adding a new provider
 
-1. Create `src/tokenoptim/providers/myprovider.py` — inherit from `BaseProvider`
+1. Create `src/llm-tokenoptim/providers/myprovider.py` — inherit from `BaseProvider`
 2. Implement `chat()`, `count_tokens()`, and `provider_name`
-3. Export from `src/tokenoptim/providers/__init__.py`
+3. Export from `src/llm-tokenoptim/providers/__init__.py`
 4. Add an async variant `myprovider_async.py` if the SDK supports it
 5. Add at least one test in `tests/`
 
 ## Adding a compression level
 
-- Output levels live in `src/tokenoptim/core/output_style.py` — add to `CompressionLevel` enum and `_PROMPTS` dict
-- Prompt levels live in `src/tokenoptim/core/compressor.py` — add to `LEVELS` tuple and `_apply_compression()`
+- Output levels live in `src/llm-tokenoptim/core/output_style.py` — add to `CompressionLevel` enum and `_PROMPTS` dict
+- Prompt levels live in `src/llm-tokenoptim/core/compressor.py` — add to `LEVELS` tuple and `_apply_compression()`
 
 ## Reporting bugs
 
 Please open an issue with:
 - Python version and OS
-- tokenoptim version (`python -c "import tokenoptim; print(tokenoptim.__version__)"`)
+- llm-tokenoptim version (`python -c "import llm-tokenoptim; print(llm-tokenoptim.__version__)"`)
 - Minimal reproducer
 - Expected vs actual behaviour
 

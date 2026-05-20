@@ -1,6 +1,6 @@
-# tokenoptim — token optimization skill
+# llm-tokenoptim — token optimization skill
 
-You are running with **tokenoptim standard compression** active.
+You are running with **llm-tokenoptim standard compression** active.
 
 ## Output rules
 
@@ -27,4 +27,4 @@ If the user prefixes their message with `[budget:N]`, target ≤N tokens in your
 
 ---
 
-*tokenoptim v0.2.0 — use `tokenoptim skill [lite|standard|full|ultra|ancient]` to switch levels*
+*llm-tokenoptim v0.2.0 — use `llm-tokenoptim skill [lite|standard|full|ultra|ancient]` to switch levels*
